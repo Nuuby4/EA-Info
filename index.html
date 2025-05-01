@@ -91,12 +91,9 @@
     }
 
     try {
-        const response = await fetch(`${cloudflareProxy}?url=${encodeURIComponent("https://gateway.ea.com/proxy/identity/namespaces/cem_ea_id/personas?displayName=" + name)}`, {
+        // Send the username and token to the worker, no need to expose the EA URL
+        const response = await fetch(`${cloudflareProxy}?username=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`, {
             method: "GET",
-            headers: {
-                "Authorization": `BEARER ${token}`,
-                "Accept": "application/json"
-            }
         });
 
         if (!response.ok) throw new Error("User not found or invalid token");
@@ -122,6 +119,7 @@
         document.getElementById("userIdResult").innerText = `Error: ${error.message}`;
     }
 }
+
 
 /*
 
