@@ -56,22 +56,13 @@
 </head>
 <body>
     <div class="container">
-        <h2>Fetch User ID from Username</h2>
+        <h2>Fetch Persona ID from Username</h2>
         <input type="text" id="username" placeholder="Enter EA ID">
         <input type="text" id="token" placeholder="Enter Token">
         <button onclick="getUserId()">Get User ID</button>
         <p id="userIdResult"></p>
 		<p id="personaIdResult1"></p>
 
-    </div>
-    
-    <div class="container">
-        <h2>Fetch Username from User ID</h2>
-        <input type="text" id="userId" placeholder="Enter User ID">
-        <input type="text" id="token2" placeholder="Enter Token">
-        <button onclick="getUsername()">Get Username</button>
-        <p id="usernameResult"></p>
-		<p id="personaIdResult2"></p>
     </div>
     
     <div class="container">
@@ -91,37 +82,61 @@
         const cloudflareProxy = "https://aged-hall-c269.nuublover29mc.workers.dev";
         
         async function getUserId() {
-            const name = document.getElementById("username").value;
-            const token = document.getElementById("token").value;
+    const name = document.getElementById("username").value;
+    const token = document.getElementById("token").value;
 
-            if (!name || !token) {
-                alert("Please enter both username and token.");
-                return;
+    if (!name || !token) {
+        alert("Please enter both username and token.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${cloudflareProxy}?url=${encodeURIComponent("https://gateway.ea.com/proxy/identity/namespaces/cem_ea_id/personas?displayName=" + name)}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `BEARER ${token}`,
+                "Accept": "application/json"
             }
+        });
 
-            try {
-                const response = await fetch(`${cloudflareProxy}?url=${encodeURIComponent("https://api3.origin.com/atom/users?eaId=" + name)}&token=${encodeURIComponent(token)}`);
-                if (!response.ok) throw new Error("User not found or invalid token");
+        if (!response.ok) throw new Error("User not found or invalid token");
 
-                const contentType = response.headers.get("Content-Type");
+        const contentType = response.headers.get("Content-Type");
 
-                if (contentType.includes("xml")) {
-                    const xmlText = await response.text();
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
-                    const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
-					const personaId1 = xmlDoc.getElementsByTagName("personaId")[0].textContent;
-					document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId1}`;
-                    document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
+        if (contentType.includes("xml")) {
+            const xmlText = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+            const personaUri = xmlDoc.getElementsByTagName("personaUri")[0].textContent;
+            const personaId = personaUri.split("/").pop(); // Extract personaId from the URI
 
-                } else {
-                    const data = await response.json();
-                    document.getElementById("userIdResult").innerText = `User ID: ${data.userId}`;
-                }
-            } catch (error) {
-                document.getElementById("userIdResult").innerText = `Error: ${error.message}`;
-            }
+            document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
+        } else {
+            const data = await response.json();
+            // Assuming personaUri is in the data structure returned
+            const personaUri = data.personaUri[0].value;
+            const personaId = personaUri.split("/").pop(); // Extract personaId from the URI
+            document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
         }
+    } catch (error) {
+        document.getElementById("userIdResult").innerText = `Error: ${error.message}`;
+    }
+}
+
+/*
+
+    <div class="container">
+        <h2>Fetch Username from User ID</h2>
+        <input type="text" id="userId" placeholder="Enter User ID">
+        <input type="text" id="token2" placeholder="Enter Token">
+        <button onclick="getUsername()">Get Username</button>
+        <p id="usernameResult"></p>
+		<p id="personaIdResult2"></p>
+    </div>
+    
+
+
+
 
         async function getUsername() {
             const id = document.getElementById("userId").value;
@@ -155,6 +170,7 @@
                 document.getElementById("usernameResult").innerText = `Error: ${error.message}`;
             }
         }
+		*/
     </script>
 </body>
 </html>
