@@ -1,15 +1,16 @@
-Get the UserId from PlayerName or PlayerName from UserId
+Get the User ID and PersonaID PlayerName or PlayerName from Persona ID
 
 Link: https://cargopants503.github.io/EA-Info/ 
 
 
 **Credits**:
 
-Fluffy-User [https://github.com/MasterTemple]
 
-        - Api + header information
 CargoPants/Nuuby [https://github.com/CargoPants503]
 
         - Website/Servers
         - Code Translation
         - UI
+7Reax + BattleDash
+        
+        - APIs + Headers for Server Backend
