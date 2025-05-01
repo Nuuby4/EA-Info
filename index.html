@@ -65,6 +65,15 @@
 
     </div>
     
+	<div class="container">
+        <h2>Fetch Username from Persona ID</h2>
+        <input type="text" id="userId" placeholder="Enter User ID">
+        <input type="text" id="token2" placeholder="Enter Token">
+        <button onclick="getUsername()">Get Username</button>
+        <p id="usernameResult"></p>
+		<p id="userIdResult2"></p>
+    </div>
+	
     <div class="container">
         <h2>Get Your Token</h2>
         <p>1. Sign into your account at ea.com. </p>
@@ -91,7 +100,6 @@
     }
 
     try {
-        // Send the username and token to the worker, no need to expose the EA URL
         const response = await fetch(`${cloudflareProxy}?username=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`, {
             method: "GET",
         });
@@ -104,71 +112,58 @@
             const xmlText = await response.text();
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
             const personaUri = xmlDoc.getElementsByTagName("personaUri")[0].textContent;
-            const personaId = personaUri.split("/").pop(); // Extract personaId from the URI
+            const personaId = personaUri.split("/").pop();
+            const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
 
             document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
+            document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
         } else {
             const data = await response.json();
-            // Assuming personaUri is in the data structure returned
-            const personaUri = data.personaUri[0].value;
-            const personaId = personaUri.split("/").pop(); // Extract personaId from the URI
+            const persona = data.personas.persona[0];
+            const personaId = persona.personaId;
+            const userId = persona.pidId;
+
             document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
+            document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
         }
     } catch (error) {
         document.getElementById("userIdResult").innerText = `Error: ${error.message}`;
+        document.getElementById("personaIdResult1").innerText = "";
     }
 }
 
 
-/*
-
-    <div class="container">
-        <h2>Fetch Username from User ID</h2>
-        <input type="text" id="userId" placeholder="Enter User ID">
-        <input type="text" id="token2" placeholder="Enter Token">
-        <button onclick="getUsername()">Get Username</button>
-        <p id="usernameResult"></p>
-		<p id="personaIdResult2"></p>
-    </div>
-    
+	 
 
 
 
+       async function getUsername() {
+    const personaId = document.getElementById("userId").value;
+    const token = document.getElementById("token2").value;
 
-        async function getUsername() {
-            const id = document.getElementById("userId").value;
-            const token = document.getElementById("token2").value;
+    if (!personaId || !token) {
+        alert("Please enter both Persona ID and token.");
+        return;
+    }
 
-            if (!id || !token) {
-                alert("Please enter both user ID and token.");
-                return;
-            }
+    try {
+const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}&token=${encodeURIComponent(token)}`);
 
-            try {
-                const response = await fetch(`${cloudflareProxy}?url=${encodeURIComponent("https://api3.origin.com/atom/users?userIds=" + id)}&token=${encodeURIComponent(token)}`);
-                if (!response.ok) throw new Error("User not found or invalid token");
+        if (!response.ok) throw new Error("Persona not found or invalid token");
 
-                const contentType = response.headers.get("Content-Type");
+        const data = await response.json();
+        const persona = data.personas.persona[0];
 
-                if (contentType.includes("xml")) {
-                    const xmlText = await response.text();
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
-                    const EAID = xmlDoc.getElementsByTagName("EAID")[0].textContent;
-					const personaId2 = xmlDoc.getElementsByTagName("personaId")[0].textContent;
-					document.getElementById("personaIdResult2").innerText = `Persona ID: ${personaId2}`;
-                    document.getElementById("usernameResult").innerText = `EA ID: ${EAID}`;
-					
-                } else {
-                    const data = await response.json();
-                    document.getElementById("usernameResult").innerText = `EA ID: ${data.users[0].EAID}`;
-                }
-            } catch (error) {
-                document.getElementById("usernameResult").innerText = `Error: ${error.message}`;
-            }
-        }
-		*/
+        document.getElementById("usernameResult").innerText = `EA ID: ${persona.displayName}`;
+        document.getElementById("userIdResult2").innerText = `User ID: ${persona.pidId}`;
+    } catch (error) {
+        document.getElementById("usernameResult").innerText = `Error: ${error.message}`;
+        document.getElementById("userIdResult2").innerText = "";
+    }
+}
+		
     </script>
 </body>
 </html>
