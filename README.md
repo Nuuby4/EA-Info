@@ -1,16 +1,21 @@
-Get the User ID and PersonaID PlayerName or PlayerName from Persona ID
+# EA Info
 
-Link: https://cargopants503.github.io/EA-Info/ 
+Use a user's PersonaId or Username and get their UserId
+
+Github pages link: https://nuuby4.github.io/EA-Info/ 
 
 
-**Credits**:
+## Credits
 
 
-CargoPants/Nuuby [https://github.com/CargoPants503]
+[Nuuby](https://github.com/Nuuby4)
+```
+Website/Servers
+Code Translation
+UI
+```
 
-        - Website/Servers
-        - Code Translation
-        - UI
 7Reax + BattleDash
-        
-        - APIs + Headers for Server Backend
+```   
+APIs and Headers for Server Backend
+```
