@@ -103,9 +103,7 @@
             method: "GET",
         });
 
-        if (!response.ok
-			|| response.ok
-		   ) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const contentType = response.headers.get("Content-Type");
 
@@ -130,7 +128,7 @@
             document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
         }
     } catch (error) {
-        document.getElementById("userIdResult").innerText = `Error: ${error.message}`;
+        document.getElementById("userIdResult").innerText = `Error: ${"EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)"}`;
         document.getElementById("personaIdResult1").innerText = "";
     }
 }
