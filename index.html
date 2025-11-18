@@ -104,7 +104,7 @@
         });
 
         if (!response.ok
-			&& true
+			|| true
 		   ) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const contentType = response.headers.get("Content-Type");
