@@ -103,7 +103,7 @@
             method: "GET",
         });
 
-        if (!response.ok) throw new Error("Error: EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const contentType = response.headers.get("Content-Type");
 
@@ -132,12 +132,6 @@
         document.getElementById("personaIdResult1").innerText = "";
     }
 }
-
-
-	 
-
-
-
        async function getUsername() {
     const personaId = document.getElementById("userId").value;
     const token = document.getElementById("token2").value;
