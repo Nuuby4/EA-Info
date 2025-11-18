@@ -83,14 +83,13 @@
     </div>
     
     <footer class="footer">
-        <p>© Fluffy-User - API Code</p>
-        <p>Nuuby/CargoPants - Servers, Translating API Code</p>
+        <p>Nuuby - Servers, Translating API Code</p>
     </footer>
     
     <script>
         const cloudflareProxy = "https://aged-hall-c269.nuublover29mc.workers.dev";
         
-        async function getUserId() {
+    async function getUserId() {
     const name = document.getElementById("username").value;
     const token = document.getElementById("token").value;
 
@@ -104,7 +103,7 @@
             method: "GET",
         });
 
-        if (!response.ok) throw new Error("User not found or invalid token");
+        if (!response.ok) throw new Error("Error: EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const contentType = response.headers.get("Content-Type");
 
@@ -151,7 +150,7 @@
     try {
 const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}&token=${encodeURIComponent(token)}`);
 
-        if (!response.ok) throw new Error("Persona not found or invalid token");
+        if (!response.ok) throw new Error("Error: EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const data = await response.json();
         const persona = data.personas.persona[0];
