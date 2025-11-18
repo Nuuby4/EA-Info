@@ -103,7 +103,9 @@
             method: "GET",
         });
 
-        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+        if (!response.ok
+			&& true
+		   ) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const contentType = response.headers.get("Content-Type");
 
@@ -144,7 +146,7 @@
     try {
 const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}&token=${encodeURIComponent(token)}`);
 
-        if (!response.ok) throw new Error("Error: EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
         const data = await response.json();
         const persona = data.personas.persona[0];
