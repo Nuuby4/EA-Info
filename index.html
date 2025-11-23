@@ -22,6 +22,7 @@
         }
         h2 {
             color: #333;
+            margin-bottom: 15px;
         }
         input {
             width: calc(100% - 22px);
@@ -39,48 +40,85 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #0056b3;
         }
-        p {
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+        .result-box.show {
+            display: block;
+        }
+        .result-item {
+            margin: 8px 0;
             font-size: 14px;
+            color: #333;
+        }
+        .result-label {
+            font-weight: bold;
             color: #555;
         }
+        .error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .info-text {
+            font-size: 13px;
+            color: #666;
+            margin: 5px 0;
+        }
         .footer {
-            margin-top: 20px;
+            margin-top: 30px;
             font-size: 12px;
             color: #777;
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Fetch Persona ID from Username</h2>
+        <h2>Fetch Info from Username</h2>
         <input type="text" id="username" placeholder="Enter EA ID">
         <input type="text" id="token" placeholder="Enter Token">
-        <button onclick="getUserId()">Get User ID</button>
-        <p id="userIdResult"></p>
-		<p id="personaIdResult1"></p>
-
+        <button onclick="getUserId()">Get Info</button>
+        <div id="usernameResults" class="result-box">
+            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay"></span></div>
+            <div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult1"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult"></span></div>
+        </div>
+        <p id="usernameError" class="error"></p>
     </div>
     
-	<div class="container">
-        <h2>Fetch Username from Persona ID</h2>
-        <input type="text" id="userId" placeholder="Enter User ID">
-        <input type="text" id="token2" placeholder="Enter Token">
-        <button onclick="getUsername()">Get Username</button>
-        <p id="usernameResult"></p>
-		<p id="userIdResult2"></p>
-    </div>
-	
     <div class="container">
-        <h2>Get Your Token</h2>
-        <p>1. Sign into your account at ea.com. </p>
-		<p>2. Visit the link below and copy what's after "access_token"</p>
-        <a href="https://accounts.ea.com/connect/auth?client_id=ORIGIN_JS_SDK&response_type=token&redirect_uri=nucleus:rest&prompt=none&release_type=prod" target="_blank">Get Token</a>
-        <p>Example: QVQxOjIuMDozLjA6MjQwOjZQbm40...</p>
+        <h2>Get Info From PlayerID</h2>
+        <input type="text" id="personaId" placeholder="Enter Player ID">
+        <button onclick="getInfoFromPersonaId()">Get Info</button>
+        <div id="personaResults" class="result-box">
+            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameFromPersona"></span></div>
+            <div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdDisplay"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdFromPersona"></span></div>
+        </div>
+        <p id="personaError" class="error"></p>
     </div>
+
     
     <footer class="footer">
         <p>Nuuby - Servers, Translating API Code</p>
@@ -89,74 +127,89 @@
     <script>
         const cloudflareProxy = "https://aged-hall-c269.nuublover29mc.workers.dev";
         
-    async function getUserId() {
-    const name = document.getElementById("username").value;
-    const token = document.getElementById("token").value;
+        async function getUserId() {
+            const name = document.getElementById("username").value;
+            const token = document.getElementById("token").value;
+            const resultsDiv = document.getElementById("usernameResults");
+            const errorP = document.getElementById("usernameError");
 
-    if (!name || !token) {
-        alert("Please enter both username and token.");
-        return;
-    }
+            // Clear previous results
+            resultsDiv.classList.remove("show");
+            errorP.innerText = "";
 
-    try {
-        const response = await fetch(`${cloudflareProxy}?username=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`, {
-            method: "GET",
-        });
+            if (!name || !token) {
+                errorP.innerText = "Please enter both username and token.";
+                return;
+            }
 
-        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+            try {
+                const response = await fetch(`${cloudflareProxy}?username=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`, {
+                    method: "GET",
+                });
 
-        const contentType = response.headers.get("Content-Type");
+                if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
 
-        if (contentType.includes("xml")) {
-            const xmlText = await response.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+                const contentType = response.headers.get("Content-Type");
 
-            const personaUri = xmlDoc.getElementsByTagName("personaUri")[0].textContent;
-            const personaId = personaUri.split("/").pop();
-            const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
+                if (contentType.includes("xml")) {
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
 
-            document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
-            document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
-        } else {
-            const data = await response.json();
-            const persona = data.personas.persona[0];
-            const personaId = persona.personaId;
-            const userId = persona.pidId;
+                    const personaUri = xmlDoc.getElementsByTagName("personaUri")[0].textContent;
+                    const personaId = personaUri.split("/").pop();
+                    const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
+                    const displayName = xmlDoc.getElementsByTagName("displayName")[0].textContent;
 
-            document.getElementById("personaIdResult1").innerText = `Persona ID: ${personaId}`;
-            document.getElementById("userIdResult").innerText = `User ID: ${userId}`;
+                    document.getElementById("usernameDisplay").innerText = displayName;
+                    document.getElementById("personaIdResult1").innerText = personaId;
+                    document.getElementById("userIdResult").innerText = userId;
+                } else {
+                    const data = await response.json();
+                    const persona = data.personas.persona[0];
+
+                    document.getElementById("usernameDisplay").innerText = persona.displayName;
+                    document.getElementById("personaIdResult1").innerText = persona.personaId;
+                    document.getElementById("userIdResult").innerText = persona.pidId;
+                }
+
+                resultsDiv.classList.add("show");
+            } catch (error) {
+                errorP.innerText = "EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)";
+            }
         }
-    } catch (error) {
-        document.getElementById("userIdResult").innerText = `Error: ${"EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)"}`;
-        document.getElementById("personaIdResult1").innerText = "";
-    }
-}
-       async function getUsername() {
-    const personaId = document.getElementById("userId").value;
-    const token = document.getElementById("token2").value;
 
-    if (!personaId || !token) {
-        alert("Please enter both Persona ID and token.");
-        return;
-    }
+        async function getInfoFromPersonaId() {
+            const personaId = document.getElementById("personaId").value;
+            const resultsDiv = document.getElementById("personaResults");
+            const errorP = document.getElementById("personaError");
 
-    try {
-const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}&token=${encodeURIComponent(token)}`);
+            // Clear previous results
+            resultsDiv.classList.remove("show");
+            errorP.innerText = "";
 
-        if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+            if (!personaId) {
+                errorP.innerText = "Please enter a Player ID.";
+                return;
+            }
 
-        const data = await response.json();
-        const persona = data.personas.persona[0];
+            try {
+                const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}`);
 
-        document.getElementById("usernameResult").innerText = `EA ID: ${persona.displayName}`;
-        document.getElementById("userIdResult2").innerText = `User ID: ${persona.pidId}`;
-    } catch (error) {
-        document.getElementById("usernameResult").innerText = `Error: ${error.message}`;
-        document.getElementById("userIdResult2").innerText = "";
-    }
-}
-		
+                if (!response.ok) throw new Error("EA API returned unexpected response");
+
+                const data = await response.json();
+                const persona = data.personas.persona[0];
+
+                document.getElementById("usernameFromPersona").innerText = persona.displayName;
+                document.getElementById("personaIdDisplay").innerText = persona.personaId;
+                document.getElementById("userIdFromPersona").innerText = persona.pidId;
+
+                resultsDiv.classList.add("show");
+            } catch (error) {
+                errorP.innerText = `Error: ${error.message}`;
+            }
+        }
     </script>
 </body>
 </html>
