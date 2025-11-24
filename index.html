@@ -95,40 +95,62 @@
 </head>
 <body>
     <div class="container">
-        <h2>Fetch Info from Username</h2>
-        <input type="text" id="username" placeholder="Enter EA ID">
+        <h2>Get Info from UserName</h2>
+        <input type="text" id="username" placeholder="Enter EA UserName">
         <input type="text" id="token" placeholder="Enter Token">
-        <button onclick="getUserId()">Get Info</button>
+        <button onclick="getFromUserName()">Get Info</button>
         <div id="usernameResults" class="result-box">
-            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay"></span></div>
-            <div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult1"></span></div>
-            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult"></span></div>
+            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay_UserName"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult_UserName"></span></div>
+			<div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult_UserName"></span></div>
+
         </div>
         <p id="usernameError" class="error"></p>
     </div>
-    
     <div class="container">
-        <h2>Get Info From PlayerID</h2>
-        <input type="text" id="personaId" placeholder="Enter Player ID">
+        <h2>Get Info From PersonaID</h2>
+        <input type="text" id="personaid" placeholder="Enter PersonaID">
+		<input type="text" id="token2" placeholder="Enter Token">
         <button onclick="getInfoFromPersonaId()">Get Info</button>
         <div id="personaResults" class="result-box">
-            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameFromPersona"></span></div>
-            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdFromPersona"></span></div>
-            <div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdDisplay"></span></div>
+            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay_PersonaID"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult_PersonaID"></span></div>
+			<div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult_PersonaID"></span></div>
 
         </div>
         <p id="personaError" class="error"></p>
     </div>
+    <div class="container">
+        <h2>Get Info From PlayerID</h2>
+        <input type="text" id="playerid" placeholder="Enter UserID">
+        <button onclick="getInfoFromPlayerId()">Get Info</button>
+        <div id="playerResults" class="result-box">
+            <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay_PlayerID"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult_PlayerID"></span></div>
+			<div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult_PlayerID"></span></div>
+
+        </div>
+        <p id="userError" class="error"></p>
+    </div>
+
+	<div class="container">
+        <h2>Get Your Token</h2>
+        <p>1. Sign into your account at ea.com. </p>
+		<p>2. Visit the link below and copy what's after "access_token"</p>
+        <a href="https://accounts.ea.com/connect/auth?client_id=ORIGIN_JS_SDK&response_type=token&redirect_uri=nucleus:rest&prompt=none&release_type=prod" target="_blank">Get Token</a>
+        <p>Example: QVQxOjIuMDozLjA6MjQwOjZQbm40...</p>
+	</div>
 
     
     <footer class="footer">
-        <p>Nuuby - Servers, Translating API Code</p>
+        <p>Nuuby - Servers, Website, Creating API Code</p>
+		<p>Reax - API</p>
     </footer>
     
     <script>
         const cloudflareProxy = "https://aged-hall-c269.nuublover29mc.workers.dev";
         
-        async function getUserId() {
+        async function getFromUserName() {
             const name = document.getElementById("username").value;
             const token = document.getElementById("token").value;
             const resultsDiv = document.getElementById("usernameResults");
@@ -162,29 +184,78 @@
                     const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
                     const displayName = xmlDoc.getElementsByTagName("displayName")[0].textContent;
 
-                    document.getElementById("usernameDisplay").innerText = displayName;
-                    document.getElementById("personaIdResult1").innerText = personaId;
-                    document.getElementById("userIdResult").innerText = userId;
+                    document.getElementById("usernameDisplay_UserName").innerText = displayName;
+                    document.getElementById("personaIdResult_UserName").innerText = personaId;
+                    document.getElementById("userIdResult_UserName").innerText = userId;
                 } else {
                     const data = await response.json();
                     const persona = data.personas.persona[0];
 
-                    document.getElementById("usernameDisplay").innerText = persona.displayName;
-                    document.getElementById("userIdResult").innerText = persona.pidId;
-                    document.getElementById("personaIdResult1").innerText = persona.personaId;
-
+                    document.getElementById("usernameDisplay_UserName").innerText = persona.displayName;
+                    document.getElementById("personaIdResult_UserName").innerText = persona.personaId;
+                    document.getElementById("userIdResult_UserName").innerText = persona.pidId;
                 }
 
                 resultsDiv.classList.add("show");
             } catch (error) {
-                errorP.innerText = "EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)";
+                errorP.innerText = "Invalid Input";
             }
         }
-
-        async function getInfoFromPersonaId() {
-            const personaId = document.getElementById("personaId").value;
+		async function getInfoFromPersonaId() {
+            const name = document.getElementById("personaid").value;
+            const token = document.getElementById("token2").value;
             const resultsDiv = document.getElementById("personaResults");
             const errorP = document.getElementById("personaError");
+
+            // Clear previous results
+            resultsDiv.classList.remove("show");
+            errorP.innerText = "";
+
+            if (!name || !token) {
+                errorP.innerText = "Please enter both username and token.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`, {
+                    method: "GET",
+                });
+
+                if (!response.ok) throw new Error("EA API returned unexpected response (EA added restrictions for their API. A fix is in progress)");
+
+                const contentType = response.headers.get("Content-Type");
+
+                if (contentType.includes("xml")) {
+                    const xmlText = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+                    const personaUri = xmlDoc.getElementsByTagName("personaUri")[0].textContent;
+                    const personaId = personaUri.split("/").pop();
+                    const userId = xmlDoc.getElementsByTagName("userId")[0].textContent;
+                    const displayName = xmlDoc.getElementsByTagName("displayName")[0].textContent;
+
+                    document.getElementById("usernameDisplay_UserName").innerText = displayName;
+                    document.getElementById("personaIdResult_UserName").innerText = personaId;
+                    document.getElementById("userIdResult_UserName").innerText = userId;
+                } else {
+                    const data = await response.json();
+                    const persona = data.personas.persona[0];
+
+                    document.getElementById("usernameDisplay_PersonaID").innerText = persona.displayName;
+                    document.getElementById("personaIdResult_PersonaID").innerText = persona.personaId;
+                    document.getElementById("userIdResult_PersonaID").innerText = persona.pidId;
+                }
+
+                resultsDiv.classList.add("show");
+            } catch (error) {
+                errorP.innerText = "Invalid Input";
+            }
+        }
+        async function getInfoFromPlayerId() {
+            const personaId = document.getElementById("playerid").value;
+            const resultsDiv = document.getElementById("playerResults");
+            const errorP = document.getElementById("userError");
 
             // Clear previous results
             resultsDiv.classList.remove("show");
@@ -196,16 +267,16 @@
             }
 
             try {
-                const response = await fetch(`${cloudflareProxy}?personaId=${encodeURIComponent(personaId)}`);
+                const response = await fetch(`${cloudflareProxy}?playerId=${encodeURIComponent(personaId)}`);
 
-                if (!response.ok) throw new Error("EA API returned unexpected response");
+                if (!response.ok) throw new Error("Invalid Input");
 
                 const data = await response.json();
                 const persona = data.personas.persona[0];
 
-                document.getElementById("usernameFromPersona").innerText = persona.displayName;
-                document.getElementById("userIdFromPersona").innerText = persona.personaId;
-                document.getElementById("personaIdDisplay").innerText = persona.pidId;
+                document.getElementById("usernameDisplay_PlayerID").innerText = persona.displayName;
+                document.getElementById("personaIdResult_PlayerID").innerText = persona.personaId;
+                document.getElementById("userIdResult_PlayerID").innerText = persona.pidId;
 
                 resultsDiv.classList.add("show");
             } catch (error) {
