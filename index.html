@@ -126,8 +126,8 @@
         <button onclick="getInfoFromPlayerId()">Get Info</button>
         <div id="playerResults" class="result-box">
             <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay_PlayerID"></span></div>
-            <div class="result-item"><span class="result-label">User ID:</span> <span id="userIdResult_PlayerID"></span></div>
-			<div class="result-item"><span class="result-label">Persona ID:</span> <span id="personaIdResult_PlayerID"></span></div>
+            <div class="result-item"><span class="result-label">User ID:</span> <span id="personaIdResult_PlayerID"></span></div>
+			<div class="result-item"><span class="result-label">Persona ID:</span> <span id="userIdResult_PlayerID"></span></div>
 
         </div>
         <p id="userError" class="error"></p>
@@ -243,8 +243,9 @@
                     const persona = data.personas.persona[0];
 
                     document.getElementById("usernameDisplay_PersonaID").innerText = persona.displayName;
-                    document.getElementById("personaIdResult_PersonaID").innerText = persona.personaId;
                     document.getElementById("userIdResult_PersonaID").innerText = persona.pidId;
+					document.getElementById("personaIdResult_PersonaID").innerText = persona.personaId;
+
                 }
 
                 resultsDiv.classList.add("show");
