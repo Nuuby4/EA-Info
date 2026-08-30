@@ -129,6 +129,7 @@
     <div class="container">
         <h2>Get Info From PlayerID</h2>
         <input type="text" id="playerid" placeholder="Enter UserID">
+        <input type="text" id="token3" placeholder="Enter Token">
         <button onclick="getInfoFromPlayerId()">Get Info</button>
         <div id="playerResults" class="result-box">
             <div class="result-item"><span class="result-label">Username:</span> <span id="usernameDisplay_PlayerID"></span></div>
@@ -162,7 +163,6 @@
             const resultsDiv = document.getElementById("usernameResults");
             const errorP = document.getElementById("usernameError");
 
-            // Clear previous results
             resultsDiv.classList.remove("show");
             errorP.innerText = "";
 
@@ -213,7 +213,6 @@
             const resultsDiv = document.getElementById("personaResults");
             const errorP = document.getElementById("personaError");
 
-            // Clear previous results
             resultsDiv.classList.remove("show");
             errorP.innerText = "";
 
@@ -261,20 +260,20 @@
         }
         async function getInfoFromPlayerId() {
             const personaId = document.getElementById("playerid").value;
+            const token = document.getElementById("token3").value;
             const resultsDiv = document.getElementById("playerResults");
             const errorP = document.getElementById("userError");
 
-            // Clear previous results
             resultsDiv.classList.remove("show");
             errorP.innerText = "";
 
-            if (!personaId) {
-                errorP.innerText = "Please enter a Player ID.";
+            if (!personaId || !token) {
+                errorP.innerText = "Please enter both Player ID and token.";
                 return;
             }
 
             try {
-                const response = await fetch(`${cloudflareProxy}?playerId=${encodeURIComponent(personaId)}`);
+                const response = await fetch(`${cloudflareProxy}?playerId=${encodeURIComponent(personaId)}&token=${encodeURIComponent(token)}`);
 
                 if (!response.ok) throw new Error("Invalid Input");
 
